@@ -1,7 +1,6 @@
 #pragma once
 #include <glad/glad.h>
 #include <SDL3/SDL.h>
-#include <openglErrorReporting.h>
 #undef main
 
 #include <iostream>
@@ -36,8 +35,8 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 6);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
 
 	// Create a window
 	SDL_Window* window = SDL_CreateWindow("SDL Main Window", 680, 480,
@@ -68,9 +67,6 @@ int main(int argc, char* argv[])
 		SDL_Quit();
 		return 1;
 	}
-
-	// Enable OpenGL error reporting
-	enableReportGlErrors();
 
 	ImGui::CreateContext();
 	ImGui::StyleColorsDark();
