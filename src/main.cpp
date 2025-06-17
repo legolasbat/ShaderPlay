@@ -1,4 +1,3 @@
-#pragma once
 #include <glad/glad.h>
 #include <SDL3/SDL.h>
 #undef main
@@ -35,6 +34,7 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
 
@@ -84,7 +84,7 @@ int main(int argc, char* argv[])
 	}
 
 	ImGui_ImplSDL3_InitForOpenGL(window, glContext);
-	ImGui_ImplOpenGL3_Init("#version 460");
+	ImGui_ImplOpenGL3_Init("#version 300 es");
 
 #pragma region vao
 
