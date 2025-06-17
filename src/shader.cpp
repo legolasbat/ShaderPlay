@@ -29,7 +29,7 @@ char* readFile(const char* source)
 	return fileContent;
 }
 
-GLint createShaderFromData(const char* data, GLenum shaderType)
+GLint Shader::createShaderFromData(const char* data, GLenum shaderType)
 {
 	GLuint shaderId = glCreateShader(shaderType);
 	glShaderSource(shaderId, 1, &data, nullptr);
@@ -40,22 +40,22 @@ GLint createShaderFromData(const char* data, GLenum shaderType)
 
 	if (!result)
 	{
-		char* message = 0;
 		int l = 0;
 
 		glGetShaderiv(shaderId, GL_INFO_LOG_LENGTH, &l);
 
 		if (l)
 		{
-			message = new char[l];
+			if (l > MAX_SIZE_MESSAGE) {
+				std::cout << "Error message too long" << "\n";
+				l = MAX_SIZE_MESSAGE;
+			}
 
-			glGetShaderInfoLog(shaderId, l, &l, message);
+			glGetShaderInfoLog(shaderId, l, &l, errorMessage);
 
-			message[l - 1] = 0;
+			errorMessage[l - 1] = 0;
 
-			std::cout << data << ":\n" << message << "\n";
-
-			delete[] message;
+			std::cout << data << ":\n" << errorMessage << "\n";
 		}
 		else
 		{
@@ -154,6 +154,10 @@ void Shader::clear()
 {
 	glDeleteProgram(id);
 	*this = {};
+}
+
+const char* Shader::GetErrorMessage() {
+	return errorMessage;
 }
 
 GLint Shader::getUniformLocation(const char* name)

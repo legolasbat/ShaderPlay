@@ -28,6 +28,8 @@ unsigned short indices[] = {
 	0, 2, 3
 };
 
+bool showErrorMessageWidget = false;
+
 int main(int argc, char* argv[])
 {
 	// Initialize SDL
@@ -171,19 +173,31 @@ int main(int argc, char* argv[])
 
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		ImGui::Begin("Color Selector");
-		static float color[3] = { 0.5, 0.5, 0.5 };
-		ImGui::ColorEdit3("Color: ", color);
-		ImGui::End();
+		//ImGui::Begin("Color Selector");
+		//static float color[3] = { 0.5, 0.5, 0.5 };
+		//ImGui::ColorEdit3("Color: ", color);
+		//ImGui::End();
 
 		ImGui::Begin("Shader Editor");
 		if (ImGui::Button("Reload Shader")) {
 			std::cout << "Reloading..." << std::endl;
-			shaderController.LoadNewShader(vertShaderText, fragShaderText);
+			if (!shaderController.LoadNewShader(vertShaderText, fragShaderText)) {
+				showErrorMessageWidget = true;
+				std::cout << shaderController.GetError() << std::endl;
+			}
+			else {
+				showErrorMessageWidget = false;
+			}
 		}
 		ImVec2 size = ImGui::GetContentRegionAvail();
 		ImGui::InputTextMultiline("##ShaderText", fragShaderText, sizeof(fragShaderText), size);
 		ImGui::End();
+
+		if (showErrorMessageWidget) {
+			ImGui::Begin("Error Message");
+			ImGui::Text(shaderController.GetError());
+			ImGui::End();
+		}
 
 		shaderController.currentShader.bind();
 
@@ -193,7 +207,7 @@ int main(int argc, char* argv[])
 
 		glUniform3fv(shaderController.u_resolution, 1, resolution);
 		glUniform1f(shaderController.u_time, (float)clock() / CLOCKS_PER_SEC);
-		glUniform3fv(shaderController.u_color, 1, color);
+		//glUniform3fv(shaderController.u_color, 1, color);
 
 		glBindVertexArray(VAO);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);

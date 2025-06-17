@@ -14,4 +14,6 @@ struct ShaderController {
 		const char* fragmentShaderData);
 
 	Shader GetCurrentShader() const;
+
+	const char* GetError();
 };
