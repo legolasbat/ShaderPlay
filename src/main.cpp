@@ -6,7 +6,8 @@
 
 #include <iostream>
 
-#include "shader.h"
+#include "shaderText.h"
+#include "shaderController.h"
 
 #pragma region imgui
 #include "imgui.h"
@@ -15,11 +16,11 @@
 #pragma endregion
 
 float triangleData[] = {
-	// positions		colors
-	0.5, 0.5, 0,		1, 0, 0,	// vertex 1
-	-0.5, 0.5, 0,		0, 1, 0,	// vertex 2
-	-0.5, -0.5, 0,		0, 0, 1,	// vertex 3
-	0.5, -0.5, 0,		0, 0, 1		// vertex 4
+	// positions	colors
+	1, 1, 0,		1, 0, 0,	// vertex 1
+	-1, 1, 0,		0, 1, 0,	// vertex 2
+	-1, -1, 0,		0, 0, 1,	// vertex 3
+	1, -1, 0,		0, 0, 1		// vertex 4
 };
 
 unsigned short indices[] = {
@@ -134,14 +135,12 @@ int main(int argc, char* argv[])
 
 #pragma region shader loading
 
-	Shader shader;
+	ShaderController shaderController;
 
-	shader.loadShaderProgramFromFile(RESOURCES_PATH "basic_shader.vert", RESOURCES_PATH "basic_shader.frag");
+	//shader.loadShaderProgramFromFile(RESOURCES_PATH "basic_shader.vert", RESOURCES_PATH "main_shader.frag");
+	shaderController.LoadNewShader(vertShaderText, fragShaderText);
 
-	shader.bind();
-
-	GLint u_time = shader.getUniformLocation("u_time");
-	GLint u_color = shader.getUniformLocation("u_color");
+	shaderController.currentShader.bind();
 
 #pragma endregion
 
@@ -177,10 +176,24 @@ int main(int argc, char* argv[])
 		ImGui::ColorEdit3("Color: ", color);
 		ImGui::End();
 
-		shader.bind();
+		ImGui::Begin("Shader Editor");
+		if (ImGui::Button("Reload Shader")) {
+			std::cout << "Reloading..." << std::endl;
+			shaderController.LoadNewShader(vertShaderText, fragShaderText);
+		}
+		ImVec2 size = ImGui::GetContentRegionAvail();
+		ImGui::InputTextMultiline("##ShaderText", fragShaderText, sizeof(fragShaderText), size);
+		ImGui::End();
 
-		//glUniform1f(u_time, (float)clock() / 100.0f);
-		glUniform3fv(u_color, 1, color);
+		shaderController.currentShader.bind();
+
+		static float resolution[3] = { 0.0, 0.0, 1.0 };
+		resolution[0] = w;
+		resolution[1] = h;
+
+		glUniform3fv(shaderController.u_resolution, 1, resolution);
+		glUniform1f(shaderController.u_time, (float)clock() / CLOCKS_PER_SEC);
+		glUniform3fv(shaderController.u_color, 1, color);
 
 		glBindVertexArray(VAO);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
@@ -200,6 +213,8 @@ int main(int argc, char* argv[])
 
 		SDL_GL_SwapWindow(window);
 	}
+
+	shaderController.currentShader.clear();
 
 	glDeleteBuffers(1, &buffer);
 	glDeleteBuffers(1, &indexBuffer);
