@@ -18,9 +18,8 @@ bool ShaderController::LoadNewShader(const char* vertexShaderData, const char* f
 
 	currentShader.id = tempShader.id;
 
-	u_resolution = currentShader.getUniformLocation("u_resolution");
-	u_time = currentShader.getUniformLocation("u_time");
-	u_color = currentShader.getUniformLocation("u_color");
+	u_resolution = currentShader.getUniformLocation("iResolution");
+	u_time = currentShader.getUniformLocation("iTime");
 
 	return result;
 }

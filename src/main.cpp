@@ -149,45 +149,13 @@ int main(int argc, char* argv[])
 	ShaderController shaderController;
 
 	//shader.loadShaderProgramFromFile(RESOURCES_PATH "basic_shader.vert", RESOURCES_PATH "main_shader.frag");
-	shaderController.LoadNewShader(vertShaderText, fragShaderText);
+
+	std::string fragShaderText = std::string(fragShaderHeader) + std::string(fragShaderBody) + std::string(fragShaderMain);
+	shaderController.LoadNewShader(vertShaderText, fragShaderText.c_str());
 
 	shaderController.currentShader.bind();
 
 #pragma endregion
-
-	// Frame Buffer and Textures
-	GLuint frameBuffer;
-	glGenFramebuffers(1, &frameBuffer);
-	glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
-
-	GLuint frameTexture;
-	glCreateTextures(GL_TEXTURE_2D, 1, &frameTexture);
-	glBindTexture(GL_TEXTURE_2D, frameTexture);
-
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, WIDTH, HEIGHT, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, frameTexture, 0);
-
-	GLuint depthTexture;
-	glCreateTextures(GL_TEXTURE_2D, 1, &depthTexture);
-	glBindTexture(GL_TEXTURE_2D, depthTexture);
-	glTexStorage2D(GL_TEXTURE_2D, 1, GL_DEPTH24_STENCIL8, WIDTH, HEIGHT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, depthTexture, 0);
-
-	GLenum buffers[4] = { GL_COLOR_ATTACHMENT0 };
-	glDrawBuffers(frameTexture, buffers);
-
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	// Main event loop
 	bool running = true;
@@ -205,33 +173,31 @@ int main(int argc, char* argv[])
 
 		// Update window size
 		int w = 0, h = 0;
-		SDL_GetWindowSize(window, &w, &h);
+		SDL_GetWindowSizeInPixels(window, &w, &h);
 		glViewport(0, 0, w, h);
 
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		imgui_pre_render();
 
-		ImGuiViewport* viewport = ImGui::GetMainViewport();
-		ImGui::SetNextWindowPos(viewport->Pos);
-		ImGui::SetNextWindowSize(ImVec2(viewport->Size.x / 2, viewport->Size.y));
-		ImGui::Begin("Shader Editor", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
-		ImGui::BeginTabBar("Shader Properties");
-		ImGui::BeginTabItem("Text Editor");
-		if (ImGui::Button("Reload Shader")) {
-			std::cout << "Reloading..." << std::endl;
-			if (!shaderController.LoadNewShader(vertShaderText, fragShaderText)) {
-				showErrorMessageWidget = true;
-				std::cout << shaderController.GetError() << std::endl;
+		//ImGui::ShowDemoWindow();
+
+		ImGui::Begin("Shader Editor", nullptr, ImGuiWindowFlags_NoCollapse);
+		if (ImGui::CollapsingHeader("Text Editor")) {
+			if (ImGui::Button("Reload Shader")) {
+				std::cout << "Reloading..." << std::endl;
+				std::string fragShaderText = std::string(fragShaderHeader) + std::string(fragShaderBody) + std::string(fragShaderMain);
+				if (!shaderController.LoadNewShader(vertShaderText, fragShaderText.c_str())) {
+					showErrorMessageWidget = true;
+					std::cout << shaderController.GetError() << std::endl;
+				}
+				else {
+					showErrorMessageWidget = false;
+				}
 			}
-			else {
-				showErrorMessageWidget = false;
-			}
+			ImVec2 size = ImGui::GetContentRegionAvail();
+			ImGui::InputTextMultiline("##ShaderText", fragShaderBody, sizeof(fragShaderBody), size);
 		}
-		ImVec2 size = ImGui::GetContentRegionAvail();
-		ImGui::InputTextMultiline("##ShaderText", fragShaderText, sizeof(fragShaderText), size);
-		ImGui::EndTabItem();
-		ImGui::EndTabBar();
 		ImGui::End();
 
 		if (showErrorMessageWidget) {
@@ -249,26 +215,10 @@ int main(int argc, char* argv[])
 		glUniform3fv(shaderController.u_resolution, 1, resolution);
 		glUniform1f(shaderController.u_time, (float)clock() / CLOCKS_PER_SEC);
 
-		glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
-		glViewport(0, 0, WIDTH, HEIGHT);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 		glBindVertexArray(VAO);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-		ImGui::SetNextWindowPos(ImVec2(viewport->Pos.x + viewport->Size.x / 2, viewport->Pos.y));
-		ImGui::SetNextWindowSize(ImVec2(viewport->Size.x / 2, viewport->Size.y));
-		ImGui::Begin("Scene", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
-
-		ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
-		const ImVec2 mSize = { viewportPanelSize.x, viewportPanelSize.y };
-
-		// add rendered texture to ImGUI scene window
-		ImGui::Image((ImTextureID)(intptr_t)(frameTexture), mSize);
-
-		ImGui::End();
 
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -288,9 +238,6 @@ int main(int argc, char* argv[])
 
 	shaderController.currentShader.clear();
 
-	glDeleteTextures(1, &frameTexture);
-	glDeleteTextures(1, &depthTexture);
-	glDeleteFramebuffers(1, &frameBuffer);
 	glDeleteBuffers(1, &buffer);
 	glDeleteBuffers(1, &indexBuffer);
 	glDeleteVertexArrays(1, &VAO);

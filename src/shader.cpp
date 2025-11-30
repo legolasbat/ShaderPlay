@@ -4,7 +4,7 @@
 #include <iostream>
 
 // This allocates memory
-char* readFile(const char* source)
+static char* readFile(const char* source)
 {
 	std::ifstream file;
 	file.open(source);
