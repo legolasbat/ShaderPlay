@@ -15,6 +15,8 @@
 #include "backends/imgui_impl_opengl3.h"
 #pragma endregion
 
+#include <chrono>
+
 float triangleData[] = {
 	// positions	colors
 	1, 1, 0,		1, 0, 0,	// vertex 1
@@ -39,6 +41,16 @@ static void imgui_pre_render() {
 	ImGui::NewFrame();
 }
 
+static float getTime(std::chrono::steady_clock::time_point startTime) {
+	auto now = std::chrono::steady_clock::now();
+	std::chrono::duration<double> elapsed = now - startTime;
+	return (float)elapsed.count();
+}
+
+static void resetTime(std::chrono::steady_clock::time_point &startTime) {
+	startTime = std::chrono::steady_clock::now();
+}
+
 int main(int argc, char* argv[])
 {
 	// Initialize SDL
@@ -52,7 +64,7 @@ int main(int argc, char* argv[])
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 6);
 
 	// Create a window
-	SDL_Window* window = SDL_CreateWindow("SDL Main Window", WIDTH, HEIGHT,
+	SDL_Window* window = SDL_CreateWindow("ShaderPlay", WIDTH, HEIGHT,
 		SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
 	if (window == nullptr)
 	{
@@ -157,6 +169,8 @@ int main(int argc, char* argv[])
 
 #pragma endregion
 
+	std::chrono::steady_clock::time_point startTime = std::chrono::steady_clock::now();
+
 	// Main event loop
 	bool running = true;
 	while (running)
@@ -195,6 +209,10 @@ int main(int argc, char* argv[])
 					showErrorMessageWidget = false;
 				}
 			}
+			ImGui::SameLine();
+			if (ImGui::Button("Reset Time")) {
+				resetTime(startTime);
+			}
 			ImVec2 size = ImGui::GetContentRegionAvail();
 			ImGui::InputTextMultiline("##ShaderText", fragShaderBody, sizeof(fragShaderBody), size);
 		}
@@ -213,7 +231,7 @@ int main(int argc, char* argv[])
 		resolution[1] = h;
 
 		glUniform3fv(shaderController.u_resolution, 1, resolution);
-		glUniform1f(shaderController.u_time, (float)clock() / CLOCKS_PER_SEC);
+		glUniform1f(shaderController.u_time, getTime(startTime));
 
 		glBindVertexArray(VAO);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
