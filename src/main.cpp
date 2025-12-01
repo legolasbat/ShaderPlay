@@ -16,20 +16,9 @@
 #include "backends/imgui_impl_opengl3.h"
 #pragma endregion
 
+#include "planeMesh.h"
+
 #include "timer.h"
-
-float triangleData[] = {
-	// positions	colors
-	1, 1, 0,		1, 0, 0,	// vertex 1
-	-1, 1, 0,		0, 1, 0,	// vertex 2
-	-1, -1, 0,		0, 0, 1,	// vertex 3
-	1, -1, 0,		0, 0, 1		// vertex 4
-};
-
-unsigned short indices[] = {
-	0, 1, 2,
-	0, 2, 3
-};
 
 bool showErrorMessageWidget = false;
 
@@ -105,47 +94,7 @@ int main(int argc, char* argv[])
 	ImGui_ImplSDL3_InitForOpenGL(window, glContext);
 	ImGui_ImplOpenGL3_Init("#version 460");
 
-#pragma region vao
-
-	GLuint VAO = 0;
-	glGenVertexArrays(1, &VAO);
-	glBindVertexArray(VAO);
-
-#pragma endregion
-
-#pragma region buffer
-
-	// Create buffer
-	GLuint buffer = 0;
-	glGenBuffers(1, &buffer);
-
-	// Bind buffer and send data
-	glBindBuffer(GL_ARRAY_BUFFER, buffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(triangleData), triangleData, GL_STATIC_DRAW);
-
-	// Attribute 0: Position
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, 0);
-
-	// Attribute 1: Color
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (void*)(sizeof(float) * 3));
-
-#pragma endregion
-
-#pragma region index buffer
-
-	// Create buffer
-	GLuint indexBuffer = 0;
-	glGenBuffers(1, &indexBuffer);
-
-	// Bind buffer and send data
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-#pragma endregion
-
-	glBindVertexArray(0);
+	Plane mainPlane;
 
 #pragma region shader loading
 
@@ -236,10 +185,7 @@ int main(int argc, char* argv[])
 		glUniform3fv(shaderController.u_resolution, 1, resolution);
 		glUniform1f(shaderController.u_time, timer.GetTime());
 
-		glBindVertexArray(VAO);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
-
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		mainPlane.Draw();
 
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -258,10 +204,6 @@ int main(int argc, char* argv[])
 	}
 
 	shaderController.currentShader.clear();
-
-	glDeleteBuffers(1, &buffer);
-	glDeleteBuffers(1, &indexBuffer);
-	glDeleteVertexArrays(1, &VAO);
 
 	// Cleanup SDL
 	SDL_DestroyWindow(window);
