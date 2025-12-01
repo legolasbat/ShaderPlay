@@ -206,6 +206,10 @@ int main(int argc, char* argv[])
 			if (ImGui::Button("Reset Time")) {
 				timer.Reset();
 			}
+			ImGui::SameLine();
+			if (ImGui::Button("Pause")) {
+				timer.Pause();
+			}
 
 			std::string timeData = "Time: " + std::to_string(timer.GetTime());
 			std::string framerateData = "Framerate: " + std::to_string(timer.GetFramerate());
