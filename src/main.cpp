@@ -5,6 +5,7 @@
 #undef main
 
 #include <iostream>
+#include <string>
 
 #include "shaderText.h"
 #include "shaderController.h"
@@ -15,7 +16,7 @@
 #include "backends/imgui_impl_opengl3.h"
 #pragma endregion
 
-#include <chrono>
+#include "timer.h"
 
 float triangleData[] = {
 	// positions	colors
@@ -39,16 +40,6 @@ static void imgui_pre_render() {
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplSDL3_NewFrame();
 	ImGui::NewFrame();
-}
-
-static float getTime(std::chrono::steady_clock::time_point startTime) {
-	auto now = std::chrono::steady_clock::now();
-	std::chrono::duration<double> elapsed = now - startTime;
-	return (float)elapsed.count();
-}
-
-static void resetTime(std::chrono::steady_clock::time_point &startTime) {
-	startTime = std::chrono::steady_clock::now();
 }
 
 int main(int argc, char* argv[])
@@ -169,12 +160,14 @@ int main(int argc, char* argv[])
 
 #pragma endregion
 
-	std::chrono::steady_clock::time_point startTime = std::chrono::steady_clock::now();
+	Timer timer;
 
 	// Main event loop
 	bool running = true;
 	while (running)
 	{
+		timer.Step();
+
 		SDL_Event event;
 		while (SDL_PollEvent(&event))
 		{
@@ -211,8 +204,14 @@ int main(int argc, char* argv[])
 			}
 			ImGui::SameLine();
 			if (ImGui::Button("Reset Time")) {
-				resetTime(startTime);
+				timer.Reset();
 			}
+
+			std::string timeData = "Time: " + std::to_string(timer.GetTime());
+			std::string framerateData = "Framerate: " + std::to_string(timer.GetFramerate());
+			std::string timerData = timeData + " | " + framerateData;
+			ImGui::SameLine();
+			ImGui::Text(timerData.c_str());
 			ImVec2 size = ImGui::GetContentRegionAvail();
 			ImGui::InputTextMultiline("##ShaderText", fragShaderBody, sizeof(fragShaderBody), size);
 		}
@@ -231,7 +230,7 @@ int main(int argc, char* argv[])
 		resolution[1] = h;
 
 		glUniform3fv(shaderController.u_resolution, 1, resolution);
-		glUniform1f(shaderController.u_time, getTime(startTime));
+		glUniform1f(shaderController.u_time, timer.GetTime());
 
 		glBindVertexArray(VAO);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
