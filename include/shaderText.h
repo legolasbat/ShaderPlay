@@ -8,7 +8,7 @@ const char fragShaderHeader[] =
 "uniform float     iTime;                 // shader playback time (in seconds)\n"
 "//uniform float     iTimeDelta;            // render time (in seconds)\n"
 "//uniform float     iFrameRate;            // shader frame rate\n"
-"//uniform int       iFrame;                // shader playback frame\n"
+"uniform int       iFrame;                // shader playback frame\n"
 "//uniform float     iChannelTime[4];       // channel playback time (in seconds)\n"
 "//uniform vec3      iChannelResolution[4]; // channel resolution (in pixels)\n"
 "//uniform vec4      iMouse;                // mouse pixel coords. xy: current (if MLB down), zw: click\n"
