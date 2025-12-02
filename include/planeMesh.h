@@ -20,7 +20,9 @@ class Plane {
 
 public:
 
-	Plane() {
+	Plane() {};
+
+	void init() {
 		VAO = 0;
 		glGenVertexArrays(1, &VAO);
 		glBindVertexArray(VAO);
