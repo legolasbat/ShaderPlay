@@ -57,54 +57,77 @@ void ShaderPlay::Draw() {
 	glClear(GL_COLOR_BUFFER_BIT);
 	shaderController.currentShader.bind();
 
-	static float resolution[3] = { 0.0, 0.0, 1.0 };
-	resolution[0] = w;
-	resolution[1] = h;
+	// Resolution
+	if (shaderController.u_resolution != -1) {
+		static float resolution[3] = { 0.0, 0.0, 1.0 };
+		resolution[0] = w;
+		resolution[1] = h;
 
-	glUniform3fv(shaderController.u_resolution, 1, resolution);
-	glUniform1f(shaderController.u_time, timer.GetTime());
-	glUniform1f(shaderController.u_timeDelta, timer.GetTimeDelta());
-	glUniform1f(shaderController.u_frameRate, timer.GetFramerate());
-	glUniform1i(shaderController.u_frame, timer.GetFrame());
+		glUniform3fv(shaderController.u_resolution, 1, resolution);
+	}
+
+	// Time
+	if (shaderController.u_time != -1) {
+		glUniform1f(shaderController.u_time, timer.GetTime());
+	}
+
+	// TimeDelta
+	if (shaderController.u_timeDelta != -1) {
+		glUniform1f(shaderController.u_timeDelta, timer.GetTimeDelta());
+	}
+
+	// FrameRate
+	if (shaderController.u_frameRate != -1) {
+		glUniform1f(shaderController.u_frameRate, timer.GetFramerate());
+	}
+
+	// Frame
+	if (shaderController.u_frame != -1) {
+		glUniform1i(shaderController.u_frame, timer.GetFrame());
+	}
 
 	// Date
-	float date[4] = { 0 };
-	auto current_date = timer.GetDate();
-	date[0] = current_date.year;
-	date[1] = current_date.month;
-	date[2] = current_date.day;
-	date[3] = current_date.time;
-	glUniform4fv(shaderController.u_date, 1, date);
+	if (shaderController.u_date != -1) {
+		float date[4] = { 0 };
+		auto current_date = timer.GetDate();
+		date[0] = current_date.year;
+		date[1] = current_date.month;
+		date[2] = current_date.day;
+		date[3] = current_date.time;
+		glUniform4fv(shaderController.u_date, 1, date);
+	}
 
 	// Mouse
-	static float mouseState[4] = { 0 };
-	float mx, my;
-	auto buttons = SDL_GetMouseState(&mx, &my);
-	
-	if (buttons & SDL_BUTTON_LEFT) {
-		// Mouse.xy = Position
-		mouseState[0] = mx;
-		mouseState[1] = my;
-		mouseState[1] = h - mouseState[1];
+	if (shaderController.u_mouse != -1) {
+		static float mouseState[4] = { 0 };
+		float mx, my;
+		auto buttons = SDL_GetMouseState(&mx, &my);
 
-		// Mouse.zw = Position last click
-		// sign(z) = Hold
-		// sign(w) = Press
-		if (mouseState[2] <= 0.0f) {
-			mouseState[2] = mouseState[0];
-			mouseState[3] = mouseState[1];
-		}
-		else if (mouseState[3] > 0.0f) {
-			mouseState[3] *= -1;
-		}
-	}
-	else {
-		if (mouseState[2] > 0.0f) {
-			mouseState[2] *= -1;
-		}
-	}
+		if (buttons & SDL_BUTTON_LEFT) {
+			// Mouse.xy = Position
+			mouseState[0] = mx;
+			mouseState[1] = my;
+			mouseState[1] = h - mouseState[1];
 
-	glUniform4fv(shaderController.u_mouse, 1, mouseState);
+			// Mouse.zw = Position last click
+			// sign(z) = Hold
+			// sign(w) = Press
+			if (mouseState[2] <= 0.0f) {
+				mouseState[2] = mouseState[0];
+				mouseState[3] = mouseState[1];
+			}
+			else if (mouseState[3] > 0.0f) {
+				mouseState[3] *= -1;
+			}
+		}
+		else {
+			if (mouseState[2] > 0.0f) {
+				mouseState[2] *= -1;
+			}
+		}
+
+		glUniform4fv(shaderController.u_mouse, 1, mouseState);
+	}
 
 	mainPlane.Draw();
 }
