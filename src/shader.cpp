@@ -4,13 +4,11 @@
 #include <iostream>
 
 // This allocates memory
-static char* readFile(const char* source)
-{
+static char* readFile(const char* source) {
 	std::ifstream file;
 	file.open(source);
 
-	if (!file.is_open())
-	{
+	if (!file.is_open()) {
 		std::cout << "Error opening file: " << source << "\n";
 		return nullptr;
 	}
@@ -29,8 +27,7 @@ static char* readFile(const char* source)
 	return fileContent;
 }
 
-GLint Shader::createShaderFromData(const char* data, GLenum shaderType)
-{
+GLint Shader::createShaderFromData(const char* data, GLenum shaderType) {
 	GLuint shaderId = glCreateShader(shaderType);
 	glShaderSource(shaderId, 1, &data, nullptr);
 	glCompileShader(shaderId);
@@ -38,27 +35,18 @@ GLint Shader::createShaderFromData(const char* data, GLenum shaderType)
 	GLint result = 0;
 	glGetShaderiv(shaderId, GL_COMPILE_STATUS, &result);
 
-	if (!result)
-	{
+	if (!result) {
 		int l = 0;
 
 		glGetShaderiv(shaderId, GL_INFO_LOG_LENGTH, &l);
 
-		if (l)
-		{
-			if (l > MAX_SIZE_MESSAGE) {
-				std::cout << "Error message too long" << "\n";
-				l = MAX_SIZE_MESSAGE;
-			}
-
-			glGetShaderInfoLog(shaderId, l, &l, errorMessage);
-
-			errorMessage[l - 1] = 0;
+		if (l) {
+			errorMessage.resize(l);
+			glGetShaderInfoLog(shaderId, l, &l, errorMessage.data());
 
 			std::cout << data << ":\n" << errorMessage << "\n";
 		}
-		else
-		{
+		else {
 			std::cout << data << ":\n" << "unknown error" << "\n";
 		}
 
@@ -70,13 +58,11 @@ GLint Shader::createShaderFromData(const char* data, GLenum shaderType)
 	return shaderId;
 }
 
-bool Shader::loadShaderProgramFromFile(const char* vertexShaderPath, const char* fragmentShaderPath)
-{
+bool Shader::loadShaderProgramFromFile(const char* vertexShaderPath, const char* fragmentShaderPath) {
 	char* vertexData = readFile(vertexShaderPath);
 	char* fragmentData = readFile(fragmentShaderPath);
 
-	if (vertexData == nullptr || fragmentData == nullptr)
-	{
+	if (vertexData == nullptr || fragmentData == nullptr) {
 		delete[] vertexData;
 		delete[] fragmentData;
 
@@ -91,16 +77,14 @@ bool Shader::loadShaderProgramFromFile(const char* vertexShaderPath, const char*
 	return rez;
 }
 
-bool Shader::loadShaderProgramFromData(const char* vertexShaderData, const char* fragmentShaderData)
-{
+bool Shader::loadShaderProgramFromData(const char* vertexShaderData, const char* fragmentShaderData) {
 	GLint vertexId = createShaderFromData(vertexShaderData, GL_VERTEX_SHADER);
 
 	if (vertexId == 0) { return false; }
 
 	GLint fragmentId = createShaderFromData(fragmentShaderData, GL_FRAGMENT_SHADER);
 
-	if (fragmentId == 0)
-	{
+	if (fragmentId == 0) {
 		glDeleteShader(vertexId);
 		return false;
 	}
@@ -118,8 +102,7 @@ bool Shader::loadShaderProgramFromData(const char* vertexShaderData, const char*
 	GLint info = 0;
 	glGetProgramiv(id, GL_LINK_STATUS, &info);
 
-	if (info != GL_TRUE)
-	{
+	if (info != GL_TRUE) {
 		char* message = 0;
 		int l = 0;
 
@@ -145,23 +128,20 @@ bool Shader::loadShaderProgramFromData(const char* vertexShaderData, const char*
 	return true;
 }
 
-void Shader::bind()
-{
+void Shader::bind() const {
 	glUseProgram(id);
 }
 
-void Shader::clear()
-{
+void Shader::clear() {
 	glDeleteProgram(id);
 	*this = {};
 }
 
-const char* Shader::GetErrorMessage() {
+std::string Shader::GetErrorMessage() const {
 	return errorMessage;
 }
 
-GLint Shader::getUniformLocation(const char* name)
-{
+GLint Shader::getUniformLocation(const char* name) const {
 	GLint result = glGetUniformLocation(id, name);
 
 	if (result == -1)

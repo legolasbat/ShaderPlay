@@ -9,7 +9,7 @@ bool ShaderController::LoadNewShader(const char* vertexShaderData, const char* f
 	bool result = tempShader.loadShaderProgramFromData(vertexShaderData, fragmentShaderData);
 
 	if (!result) {
-		strcpy(currentShader.errorMessage, tempShader.errorMessage);
+		currentShader.errorMessage = tempShader.errorMessage;
 		tempShader.clear();
 		return result;
 	}
@@ -30,6 +30,6 @@ Shader ShaderController::GetCurrentShader() const
 	return currentShader;
 }
 
-const char* ShaderController::GetError() {
+std::string ShaderController::GetError() {
 	return currentShader.GetErrorMessage();
 }

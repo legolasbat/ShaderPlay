@@ -82,7 +82,7 @@ void ShaderPlay::Run() {
 
 		if (showErrorMessageWidget) {
 			ImGui::Begin("Error Message");
-			ImGui::Text(shaderController.GetError());
+			ImGui::Text(shaderController.GetError().c_str());
 			ImGui::End();
 		}
 

@@ -1,13 +1,13 @@
 #pragma once
 #include <glad/glad.h>
 
-const int MAX_SIZE_MESSAGE = 2048;
+#include <string>
 
 struct Shader
 {
 	GLuint id = 0;
 
-	char errorMessage[MAX_SIZE_MESSAGE] = "";
+	std::string errorMessage = "";
 
 	bool loadShaderProgramFromFile(const char* vertexShaderPath,
 		const char* fragmentShaderPath);
@@ -17,11 +17,11 @@ struct Shader
 
 	GLint createShaderFromData(const char* data, GLenum shaderType);
 
-	void bind();
+	void bind() const;
 
 	void clear();
 
-	GLint getUniformLocation(const char* name);
+	GLint getUniformLocation(const char* name) const;
 
-	const char* GetErrorMessage();
+	std::string GetErrorMessage() const;
 };

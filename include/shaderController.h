@@ -15,5 +15,5 @@ struct ShaderController {
 
 	Shader GetCurrentShader() const;
 
-	const char* GetError();
+	std::string GetError();
 };
