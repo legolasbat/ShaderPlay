@@ -65,6 +65,36 @@ void ShaderPlay::Draw() {
 	glUniform1f(shaderController.u_time, timer.GetTime());
 	glUniform1i(shaderController.u_frame, timer.GetFrame());
 
+	// Mouse
+	static float mouseState[4] = {0};
+	float mx, my;
+	auto buttons = SDL_GetMouseState(&mx, &my);
+	
+	if (buttons & SDL_BUTTON_LEFT) {
+		// Mouse.xy = Position
+		mouseState[0] = mx;
+		mouseState[1] = my;
+		mouseState[1] = h - mouseState[1];
+
+		// Mouse.zw = Position last click
+		// sign(z) = Hold
+		// sign(w) = Press
+		if (mouseState[2] <= 0.0f) {
+			mouseState[2] = mouseState[0];
+			mouseState[3] = mouseState[1];
+		}
+		else if (mouseState[3] > 0.0f) {
+			mouseState[3] *= -1;
+		}
+	}
+	else {
+		if (mouseState[2] > 0.0f) {
+			mouseState[2] *= -1;
+		}
+	}
+
+	glUniform4fv(shaderController.u_mouse, 1, mouseState);
+
 	mainPlane.Draw();
 }
 

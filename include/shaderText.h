@@ -11,7 +11,7 @@ const char fragShaderHeader[] =
 "uniform int       iFrame;                // shader playback frame\n"
 "//uniform float     iChannelTime[4];       // channel playback time (in seconds)\n"
 "//uniform vec3      iChannelResolution[4]; // channel resolution (in pixels)\n"
-"//uniform vec4      iMouse;                // mouse pixel coords. xy: current (if MLB down), zw: click\n"
+"uniform vec4      iMouse;                // mouse pixel coords. xy: current (if MLB down), zw: click\n"
 "//uniform samplerXX iChannel0..3;          // input channel. XX = 2D/Cube\n"
 "//uniform vec4      iDate;                 // (year, month, day, time in seconds)\n"
 "//uniform float     iSampleRate;           // sound sample rate (i.e., 44100)\n"

@@ -21,6 +21,7 @@ bool ShaderController::LoadNewShader(const char* vertexShaderData, const char* f
 	u_resolution = currentShader.getUniformLocation("iResolution");
 	u_time = currentShader.getUniformLocation("iTime");
 	u_frame = currentShader.getUniformLocation("iFrame");
+	u_mouse = currentShader.getUniformLocation("iMouse");
 
 	return result;
 }
