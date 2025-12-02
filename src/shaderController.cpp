@@ -24,6 +24,7 @@ bool ShaderController::LoadNewShader(const char* vertexShaderData, const char* f
 	u_frameRate = currentShader.getUniformLocation("iFrameRate");
 	u_frame = currentShader.getUniformLocation("iFrame");
 	u_mouse = currentShader.getUniformLocation("iMouse");
+	u_date = currentShader.getUniformLocation("iDate");
 
 	return result;
 }

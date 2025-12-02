@@ -67,8 +67,17 @@ void ShaderPlay::Draw() {
 	glUniform1f(shaderController.u_frameRate, timer.GetFramerate());
 	glUniform1i(shaderController.u_frame, timer.GetFrame());
 
+	// Date
+	float date[4] = { 0 };
+	auto current_date = timer.GetDate();
+	date[0] = current_date.year;
+	date[1] = current_date.month;
+	date[2] = current_date.day;
+	date[3] = current_date.time;
+	glUniform4fv(shaderController.u_date, 1, date);
+
 	// Mouse
-	static float mouseState[4] = {0};
+	static float mouseState[4] = { 0 };
 	float mx, my;
 	auto buttons = SDL_GetMouseState(&mx, &my);
 	
