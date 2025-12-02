@@ -8,6 +8,8 @@ struct ShaderController {
 
 	GLint u_resolution = 0;
 	GLint u_time = 0;
+	GLint u_timeDelta = 0;
+	GLint u_frameRate = 0;
 	GLint u_frame = 0;
 	GLint u_mouse = 0;
 
@@ -16,5 +18,5 @@ struct ShaderController {
 
 	Shader GetCurrentShader() const;
 
-	std::string GetError();
+	std::string GetError() const;
 };

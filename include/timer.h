@@ -31,7 +31,6 @@ public:
 
 	void Step() {
 		if (pause) {
-			timeDelta = 0.0f;
 			return;
 		}
 

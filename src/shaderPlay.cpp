@@ -63,6 +63,8 @@ void ShaderPlay::Draw() {
 
 	glUniform3fv(shaderController.u_resolution, 1, resolution);
 	glUniform1f(shaderController.u_time, timer.GetTime());
+	glUniform1f(shaderController.u_timeDelta, timer.GetTimeDelta());
+	glUniform1f(shaderController.u_frameRate, timer.GetFramerate());
 	glUniform1i(shaderController.u_frame, timer.GetFrame());
 
 	// Mouse

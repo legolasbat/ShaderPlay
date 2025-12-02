@@ -6,8 +6,8 @@ const char fragShaderHeader[] =
 
 "uniform vec3      iResolution;           // viewport resolution (in pixels)\n"
 "uniform float     iTime;                 // shader playback time (in seconds)\n"
-"//uniform float     iTimeDelta;            // render time (in seconds)\n"
-"//uniform float     iFrameRate;            // shader frame rate\n"
+"uniform float     iTimeDelta;            // render time (in seconds)\n"
+"uniform float     iFrameRate;            // shader frame rate\n"
 "uniform int       iFrame;                // shader playback frame\n"
 "//uniform float     iChannelTime[4];       // channel playback time (in seconds)\n"
 "//uniform vec3      iChannelResolution[4]; // channel resolution (in pixels)\n"
