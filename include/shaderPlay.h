@@ -8,6 +8,7 @@
 
 #include "planeMesh.h"
 #include "shaderController.h"
+#include "timer.h"
 
 class ShaderPlay {
 protected:
@@ -17,8 +18,11 @@ protected:
 	ShaderController shaderController;
 	Plane mainPlane;
 
+	Timer timer;
+
 	const int WIDTH = 1280;
 	const int HEIGHT = 720;
+	bool showErrorMessageWidget = false;
 
 public:
 	ShaderPlay();
@@ -30,5 +34,9 @@ private:
 	void initImGui();
 	void initShaderController();
 
+	void DrawImGui();
+	void Draw();
+
 	void imgui_pre_render();
+	void imgui_post_render();
 };

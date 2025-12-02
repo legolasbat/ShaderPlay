@@ -23,7 +23,9 @@ public:
 
 	Timer() {
 		pause = false;
+	}
 
+	void Start() {
 		Reset();
 	}
 

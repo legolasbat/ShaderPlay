@@ -5,7 +5,6 @@
 #include <iostream>
 #include <string>
 
-#include "timer.h"
 #include "shaderText.h"
 
 ShaderPlay::ShaderPlay() {
@@ -19,8 +18,7 @@ ShaderPlay::ShaderPlay() {
 }
 
 void ShaderPlay::Run() {
-	Timer timer;
-	bool showErrorMessageWidget = false;
+	timer.Start();
 
 	// Main event loop
 	bool running = true;
@@ -38,81 +36,77 @@ void ShaderPlay::Run() {
 			}
 		}
 
-		// Update window size
-		int w = 0, h = 0;
-		SDL_GetWindowSizeInPixels(window, &w, &h);
-		glViewport(0, 0, w, h);
-
-		glClear(GL_COLOR_BUFFER_BIT);
-
 		imgui_pre_render();
 
-		ImGui::Begin("Shader Editor", nullptr, ImGuiWindowFlags_NoCollapse);
-		if (ImGui::CollapsingHeader("Text Editor")) {
-			if (ImGui::Button("Reload Shader")) {
-				std::cout << "Reloading..." << std::endl;
-				std::string fragShaderText = std::string(fragShaderHeader) + std::string(fragShaderBody) + std::string(fragShaderMain);
-				if (!shaderController.LoadNewShader(vertShaderText, fragShaderText.c_str())) {
-					showErrorMessageWidget = true;
-					std::cout << shaderController.GetError() << std::endl;
-				}
-				else {
-					showErrorMessageWidget = false;
-					timer.Reset();
-				}
-			}
-			ImGui::SameLine();
-			if (ImGui::Button("Reset Time")) {
-				timer.Reset();
-			}
-			ImGui::SameLine();
-			if (ImGui::Button("Pause")) {
-				timer.Pause();
-			}
+		DrawImGui();
 
-			std::string timeData = "Time: " + std::to_string(timer.GetTime());
-			std::string framerateData = "Framerate: " + std::to_string(timer.GetFramerate());
-			std::string timerData = timeData + " | " + framerateData;
-			ImGui::SameLine();
-			ImGui::Text(timerData.c_str());
-			ImVec2 size = ImGui::GetContentRegionAvail();
-			ImGui::InputTextMultiline("##ShaderText", fragShaderBody, sizeof(fragShaderBody), size);
-		}
-		ImGui::End();
+		Draw();
 
-		if (showErrorMessageWidget) {
-			ImGui::Begin("Error Message");
-			ImGui::Text(shaderController.GetError().c_str());
-			ImGui::End();
-		}
-
-		shaderController.currentShader.bind();
-
-		static float resolution[3] = { 0.0, 0.0, 1.0 };
-		resolution[0] = w;
-		resolution[1] = h;
-
-		glUniform3fv(shaderController.u_resolution, 1, resolution);
-		glUniform1f(shaderController.u_time, timer.GetTime());
-		glUniform1i(shaderController.u_frame, timer.GetFrame());
-
-		mainPlane.Draw();
-
-		ImGui::Render();
-		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-		//view port stuff
-		ImGuiIO& io = ImGui::GetIO();
-		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-		{
-			SDL_Window* backup_current_window = SDL_GL_GetCurrentWindow();
-			SDL_GLContext backup_current_context = SDL_GL_GetCurrentContext();
-			ImGui::UpdatePlatformWindows();
-			ImGui::RenderPlatformWindowsDefault();
-			SDL_GL_MakeCurrent(backup_current_window, backup_current_context);
-		}
+		imgui_post_render();
 
 		SDL_GL_SwapWindow(window);
+	}
+}
+
+void ShaderPlay::Draw() {
+	// Update window size
+	int w = 0, h = 0;
+	SDL_GetWindowSizeInPixels(window, &w, &h);
+	glViewport(0, 0, w, h);
+
+	glClear(GL_COLOR_BUFFER_BIT);
+	shaderController.currentShader.bind();
+
+	static float resolution[3] = { 0.0, 0.0, 1.0 };
+	resolution[0] = w;
+	resolution[1] = h;
+
+	glUniform3fv(shaderController.u_resolution, 1, resolution);
+	glUniform1f(shaderController.u_time, timer.GetTime());
+	glUniform1i(shaderController.u_frame, timer.GetFrame());
+
+	mainPlane.Draw();
+}
+
+void ShaderPlay::DrawImGui() {
+
+	ImGui::Begin("Shader Editor", nullptr, ImGuiWindowFlags_NoCollapse);
+	if (ImGui::CollapsingHeader("Text Editor")) {
+		if (ImGui::Button("Reload Shader")) {
+			std::cout << "Reloading..." << std::endl;
+			std::string fragShaderText = std::string(fragShaderHeader) + std::string(fragShaderBody) + std::string(fragShaderMain);
+			if (!shaderController.LoadNewShader(vertShaderText, fragShaderText.c_str())) {
+				showErrorMessageWidget = true;
+				std::cout << shaderController.GetError() << std::endl;
+			}
+			else {
+				showErrorMessageWidget = false;
+				timer.Reset();
+			}
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("Reset Time")) {
+			timer.Reset();
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("Pause")) {
+			timer.Pause();
+		}
+
+		std::string timeData = "Time: " + std::to_string(timer.GetTime());
+		std::string framerateData = "Framerate: " + std::to_string(timer.GetFramerate());
+		std::string timerData = timeData + " | " + framerateData;
+		ImGui::SameLine();
+		ImGui::Text(timerData.c_str());
+		ImVec2 size = ImGui::GetContentRegionAvail();
+		ImGui::InputTextMultiline("##ShaderText", fragShaderBody, sizeof(fragShaderBody), size);
+	}
+	ImGui::End();
+
+	if (showErrorMessageWidget) {
+		ImGui::Begin("Error Message");
+		ImGui::Text(shaderController.GetError().c_str());
+		ImGui::End();
 	}
 }
 
@@ -190,6 +184,22 @@ void ShaderPlay::imgui_pre_render() {
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplSDL3_NewFrame();
 	ImGui::NewFrame();
+}
+
+void ShaderPlay::imgui_post_render() {
+	ImGui::Render();
+	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+	//view port stuff
+	ImGuiIO& io = ImGui::GetIO();
+	if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+	{
+		SDL_Window* backup_current_window = SDL_GL_GetCurrentWindow();
+		SDL_GLContext backup_current_context = SDL_GL_GetCurrentContext();
+		ImGui::UpdatePlatformWindows();
+		ImGui::RenderPlatformWindowsDefault();
+		SDL_GL_MakeCurrent(backup_current_window, backup_current_context);
+	}
 }
 
 ShaderPlay::~ShaderPlay() {
