@@ -20,7 +20,9 @@ class Plane {
 
 public:
 
-	Plane() {};
+	Plane() {
+		VAO = 0;
+	};
 
 	void init() {
 		VAO = 0;

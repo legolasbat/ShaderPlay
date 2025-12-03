@@ -30,6 +30,12 @@ public:
 
 	Timer() {
 		pause = false;
+
+		frame = 0;
+		frameRate = 0.0f;
+
+		time = 0.0f;
+		timeDelta = 0.0f;
 	}
 
 	void Start() {
