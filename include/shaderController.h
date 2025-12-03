@@ -12,6 +12,10 @@ struct ShaderController {
 	GLint u_frameRate = 0;
 	GLint u_frame = 0;
 	GLint u_mouse = 0;
+	GLint u_texture0 = 0;
+	GLint u_texture1 = 0;
+	GLint u_texture2 = 0;
+	GLint u_texture3 = 0;
 	GLint u_date = 0;
 
 	bool LoadNewShader(const char* vertexShaderData,

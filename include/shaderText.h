@@ -4,17 +4,19 @@ const char fragShaderHeader[] =
 
 "in vec3 v_position;\n"
 
-"uniform vec3      iResolution;           // viewport resolution (in pixels)\n"
-"uniform float     iTime;                 // shader playback time (in seconds)\n"
-"uniform float     iTimeDelta;            // render time (in seconds)\n"
-"uniform float     iFrameRate;            // shader frame rate\n"
-"uniform int       iFrame;                // shader playback frame\n"
-"//uniform float     iChannelTime[4];       // channel playback time (in seconds)\n"
-"//uniform vec3      iChannelResolution[4]; // channel resolution (in pixels)\n"
-"uniform vec4      iMouse;                // mouse pixel coords. xy: current (if MLB down), zw: click\n"
-"//uniform samplerXX iChannel0..3;          // input channel. XX = 2D/Cube\n"
-"uniform vec4      iDate;                 // (year, month, day, time in seconds)\n"
-"//uniform float     iSampleRate;           // sound sample rate (i.e., 44100)\n"
+"uniform vec3		iResolution;			// viewport resolution (in pixels)\n"
+"uniform float		iTime;					// shader playback time (in seconds)\n"
+"uniform float		iTimeDelta;				// render time (in seconds)\n"
+"uniform float		iFrameRate;				// shader frame rate\n"
+"uniform int		iFrame;					// shader playback frame\n"
+"//uniform float	iChannelTime[4];		// channel playback time (in seconds)\n"
+"//uniform vec3		iChannelResolution[4];	// channel resolution (in pixels)\n"
+"uniform vec4		iMouse;					// mouse pixel coords. xy: current (if MLB down), zw: click\n"
+"uniform sampler2D	iChannel0;				// input channel0\n"
+"uniform sampler2D	iChannel1;				// input channel1\n"
+"uniform sampler2D	iChannel2;				// input channel2\n"
+"uniform sampler2D	iChannel3;				// input channel3\n"
+"uniform vec4		iDate;					// (year, month, day, time in seconds)\n"
 ;
 
 const char fragShaderMain[] =
