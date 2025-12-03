@@ -9,6 +9,7 @@
 #include "planeMesh.h"
 #include "shaderController.h"
 #include "timer.h"
+#include "textureLoader.h"
 
 class ShaderPlay {
 protected:
@@ -19,11 +20,16 @@ protected:
 	Plane mainPlane;
 
 	Timer timer;
+	TextureLoader textureLoader;
 
 	const int WIDTH = 1280;
 	const int HEIGHT = 720;
 
 	bool showErrorMessageWidget = false;
+	bool showTextureExplorer = false;
+	int selectedTexture = -1;
+
+	int activeTextures[4];
 
 public:
 	ShaderPlay();
@@ -40,4 +46,6 @@ private:
 
 	void imgui_pre_render();
 	void imgui_post_render();
+
+	void DrawChannelTexture(int index);
 };

@@ -1,0 +1,72 @@
+#include "Texture.h"
+
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
+Texture::Texture() {
+	textureID = 0;
+	width = 0;
+	height = 0;
+	bitDepth = 0;
+	fileLocation = "";
+}
+
+Texture::Texture(const char* fileLoc) {
+	textureID = 0;
+	width = 0;
+	height = 0;
+	bitDepth = 0;
+	fileLocation = fileLoc;
+}
+
+bool Texture::LoadTexture() {
+	unsigned char* textData = stbi_load(fileLocation, &width, &height, &bitDepth, 3);
+	if (!textData) {
+		printf("Failed to find: %s\n", fileLocation);
+		return false;
+	}
+
+	glGenTextures(1, &textureID);
+	glBindTexture(GL_TEXTURE_2D, textureID);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, textData);
+	glGenerateMipmap(GL_TEXTURE_2D);
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	stbi_image_free(textData);
+
+	return true;
+}
+
+void Texture::GetTextureID(GLuint* textureID) const {
+	*textureID = this->textureID;
+}
+
+void Texture::GetTextureSize(int* width, int* height) const {
+	*width = this->width;
+	*height = this->height;
+}
+
+void Texture::UseTexture(int index) const {
+	glActiveTexture(GL_TEXTURE0 + index);
+	glBindTexture(GL_TEXTURE_2D, textureID);
+}
+
+void Texture::ClearTexture() {
+	glDeleteTextures(1, &textureID);
+	textureID = 0;
+	width = 0;
+	height = 0;
+	bitDepth = 0;
+	fileLocation = "";
+}
+
+Texture::~Texture() {
+	ClearTexture();
+}

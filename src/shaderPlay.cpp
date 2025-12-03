@@ -15,6 +15,12 @@ ShaderPlay::ShaderPlay() {
 
 	initShaderController();
 	mainPlane.init();
+	textureLoader.LoadDefaultTextures();
+
+	activeTextures[0] = -1;
+	activeTextures[1] = -1;
+	activeTextures[2] = -1;
+	activeTextures[3] = -1;
 }
 
 void ShaderPlay::Run() {
@@ -129,11 +135,38 @@ void ShaderPlay::Draw() {
 		glUniform4fv(shaderController.u_mouse, 1, mouseState);
 	}
 
+	// Textures
+	if (shaderController.u_texture0 != -1) {
+		if (activeTextures[0] != -1) {
+			textureLoader.GetTextures(activeTextures[0])->UseTexture(0);
+			glUniform1i(shaderController.u_texture0, 0);
+		}
+	}
+	if (shaderController.u_texture1 != -1) {
+		if (activeTextures[1] != -1) {
+			textureLoader.GetTextures(activeTextures[1])->UseTexture(1);
+			glUniform1i(shaderController.u_texture1, 1);
+		}
+	}
+	if (shaderController.u_texture2 != -1) {
+		if (activeTextures[2] != -1) {
+			textureLoader.GetTextures(activeTextures[2])->UseTexture(2);
+			glUniform1i(shaderController.u_texture2, 2);
+		}
+	}
+	if (shaderController.u_texture3 != -1) {
+		if (activeTextures[0] != -1) {
+			textureLoader.GetTextures(activeTextures[3])->UseTexture(3);
+			glUniform1i(shaderController.u_texture3, 3);
+		}
+	}
+
 	mainPlane.Draw();
+
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void ShaderPlay::DrawImGui() {
-
 	ImGui::Begin("Shader Editor", nullptr, ImGuiWindowFlags_NoCollapse);
 	if (ImGui::CollapsingHeader("Text Editor")) {
 		if (ImGui::Button("Reload Shader")) {
@@ -165,6 +198,18 @@ void ShaderPlay::DrawImGui() {
 		ImVec2 size = ImGui::GetContentRegionAvail();
 		ImGui::InputTextMultiline("##ShaderText", fragShaderBody, sizeof(fragShaderBody), size);
 	}
+	if (ImGui::CollapsingHeader("Texture Picker")) {
+		// iChannel0
+		DrawChannelTexture(0);
+		ImGui::SameLine();
+		// iChannel1
+		DrawChannelTexture(1);
+		// iChannel2
+		DrawChannelTexture(2);
+		ImGui::SameLine();
+		// iChannel3
+		DrawChannelTexture(3);
+	}
 	ImGui::End();
 
 	if (showErrorMessageWidget) {
@@ -172,6 +217,69 @@ void ShaderPlay::DrawImGui() {
 		ImGui::Text(shaderController.GetError().c_str());
 		ImGui::End();
 	}
+
+	if (showTextureExplorer) {
+		ImGui::Begin("Texture Explorer");
+
+		if (ImGui::Button("Cancel")) {
+			showTextureExplorer = false;
+		}
+
+		GLuint textureID = 0;
+		int textureWidth = 0, textureHeight = 0;
+		int imageWidth = 128, imageHeight = 128;
+		for (int i = 0; i < numberDefaultTextures; i++) {
+			textureLoader.GetTextures(i)->GetTextureID(&textureID);
+			textureLoader.GetTextures(i)->GetTextureSize(&textureWidth, &textureHeight);
+			ImGui::BeginGroup();
+			ImGui::Text("size = %d x %d", textureWidth, textureHeight);
+			ImGui::PushID(i);
+			if (ImGui::ImageButton("DefaultTexture", (ImTextureID)(intptr_t)textureID, ImVec2(imageWidth, imageHeight))) {
+				activeTextures[selectedTexture] = i;
+				showTextureExplorer = false;
+			}
+			ImGui::PopID();
+			ImGui::EndGroup();
+			if ((i + 1) % 5 != 0 && i != numberDefaultTextures - 1) {
+				ImGui::SameLine();
+			}
+		}
+
+		ImGui::End();
+	}
+}
+
+void ShaderPlay::DrawChannelTexture(int index) {
+	GLuint textureID = 0;
+	int textureWidth = 0, textureHeight = 0;
+	int imageWidth = 256, imageHeight = 256;
+	int activeTexture = activeTextures[index];
+	if (activeTexture != -1) {
+		textureLoader.GetTextures(activeTexture)->GetTextureID(&textureID);
+		textureLoader.GetTextures(activeTexture)->GetTextureSize(&textureWidth, &textureHeight);
+	}
+	else {
+		textureID = 0;
+	}
+	// iChannelX
+	ImGui::BeginGroup();
+	ImGui::Text("iChannel%d", index);
+	ImGui::Text("size = %d x %d", textureWidth, textureHeight);
+	if (activeTexture != -1) {
+		ImGui::SameLine();
+		ImGui::PushID(index);
+		if (ImGui::Button("Remove Texture")) {
+			activeTextures[index] = -1;
+		}
+		ImGui::PopID();
+	}
+	ImGui::PushID(index);
+	if (ImGui::ImageButton("iChannel", (ImTextureID)(intptr_t)textureID, ImVec2(imageWidth, imageHeight))) {
+		showTextureExplorer = true;
+		selectedTexture = index;
+	}
+	ImGui::PopID();
+	ImGui::EndGroup();
 }
 
 bool ShaderPlay::initSDLWindow() {
