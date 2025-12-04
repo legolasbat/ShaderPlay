@@ -21,6 +21,11 @@ ShaderPlay::ShaderPlay() {
 	activeTextures[1] = -1;
 	activeTextures[2] = -1;
 	activeTextures[3] = -1;
+
+	activeTexturesFlip[0] = false;
+	activeTexturesFlip[1] = false;
+	activeTexturesFlip[2] = false;
+	activeTexturesFlip[3] = false;
 }
 
 void ShaderPlay::Run() {
@@ -272,6 +277,52 @@ void ShaderPlay::DrawChannelTexture(int index) {
 			activeTextures[index] = -1;
 		}
 		ImGui::PopID();
+
+		ImGui::PushItemWidth(imageWidth / 2.0f);
+		const char* filters[] = { "nearest", "linear", "mipmap" };
+		ImGui::Text("Filter:");
+		ImGui::SameLine();
+		ImGui::PushID(index);
+		Filter currentFilter = textureLoader.GetTextures(activeTexture)->GetFilter();
+		if (ImGui::BeginCombo("##filter", filters[currentFilter], 0)) {
+			for (int i = 0; i < 3; i++) {
+				bool is_selected = (currentFilter == i);
+				if (ImGui::Selectable(filters[i], is_selected)) {
+					textureLoader.GetTextures(activeTexture)->SetFilter((Filter)i);
+				}
+				if (is_selected) {
+					ImGui::SetItemDefaultFocus();
+				}
+			}
+			ImGui::EndCombo();
+		}
+		ImGui::PopID();
+
+		const char* wraps[] = { "clamp", "repeat" };
+
+		ImGui::Text("Wrap:");
+		ImGui::SameLine();
+		ImGui::PushID(index);
+		Wrap currentWrap = textureLoader.GetTextures(activeTexture)->GetWrap();
+		if (ImGui::BeginCombo("##wrap", wraps[currentWrap], 0)) {
+			for (int i = 0; i < 2; i++) {
+				bool is_selected = (currentWrap == i);
+				if (ImGui::Selectable(wraps[i], is_selected)) {
+					textureLoader.GetTextures(activeTexture)->SetWrap((Wrap)i);
+				}
+				if (is_selected) {
+					ImGui::SetItemDefaultFocus();
+				}
+			}
+			ImGui::EndCombo();
+		}
+		ImGui::PopID();
+		ImGui::PushID(index);
+		if (ImGui::Checkbox("Vflip", &activeTexturesFlip[index])) {
+			textureLoader.GetTextures(activeTexture)->LoadTextureFlip();
+		}
+		ImGui::PopID();
+		ImGui::PopItemWidth();
 	}
 	ImGui::PushID(index);
 	if (ImGui::ImageButton("iChannel", (ImTextureID)(intptr_t)textureID, ImVec2(imageWidth, imageHeight))) {

@@ -5,8 +5,7 @@
 void TextureLoader::LoadDefaultTextures() {
 	int i = 0;
 	for (const auto& file : std::filesystem::directory_iterator(RESOURCES_PATH "textures")) {
-		std::string path = file.path().string();
-		defaultTextures[i] = new Texture(path.c_str());
+		defaultTextures[i] = new Texture(file.path().string());
 		defaultTextures[i]->LoadTexture();
 		i++;
 		if (i == numberDefaultTextures) {

@@ -30,6 +30,7 @@ protected:
 	int selectedTexture = -1;
 
 	int activeTextures[4];
+	bool activeTexturesFlip[4];
 
 public:
 	ShaderPlay();
